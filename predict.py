@@ -4,4 +4,5 @@ with open("thetas.txt") as f:
     theta1 = float(f.readline())
 print("Enter a mileage")
 mileage = int(input())
-print(str(estimate.estimateLine(theta0, theta1, mileage)))
+thetas = [theta0, theta1]
+print(str(estimate.estimateLine(thetas, mileage)))

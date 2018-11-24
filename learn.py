@@ -1,27 +1,49 @@
 import estimate
-learningRate = 0.0001
+
+learningRate = 0.0005
+thetas = [0, 0]
+avgkm = 0
+minkm = float("inf")
+maxkm = 0
 with open("data.csv") as f:
     f.readline()
     data = [[]]
     for line in f:
         values = line.split(',')
-        data.append([int(values[0]), int(values[1][:-1])])
-thetas = [0.1, 5.0]
-accuracy = 1
-m = len(data) - 1
-while accuracy > 0.05:
-    iterdata = iter(data)
-    next(iterdata)
+        km = int(values[0])
+        data.append([km, int(values[1][:-1])])
+        avgkm += km
+        if km > maxkm:
+            maxkm = km
+        if km < minkm:
+            minkm = km
+data.pop(0)
+m = len(data)
+avgkm = avgkm / m
+for values in data:
+    values[0] = (values[0] - minkm) / (maxkm - minkm)
+error = 1
+dataplot = list(map(list, zip(*data)))
+errordelta = 1
+cost_f = []
+i = 0
+while abs(errordelta) > 0.00005 and i < 50000:
     thetasum0 = 0
     thetasum1 = 0
-    for values in iterdata:
-        estimated = estimate.estimateLine(thetas[0], thetas[1], values[0])
-        thetasum0 = thetasum0 + estimated - values[1]
-        thetasum1 = thetasum1 + estimated - values[1] * values[0]
-    oldthetas = [0,0]
-    oldthetas[0] = thetas[0]
-    oldthetas[1] = thetas[1]
-    thetas[0] = learningRate * thetasum0 / m
-    thetas[1] = learningRate * thetasum1 / m
-    accuracy = estimate.accuracy(thetas, data)
-print(estimate.accuracy(thetas, data))
+    for values in data:
+        mileage = values[0]
+        price = values[1]
+        estimatedPrice = estimate.estimateLine(thetas, mileage)
+        thetasum0 += estimatedPrice - price
+        thetasum1 += (estimatedPrice - price) * mileage
+    thetas[0] = thetas[0] - learningRate * thetasum0 / m
+    thetas[1] = thetas[1] - learningRate  * thetasum1 / m
+    olderror = error
+    error = estimate.cost(thetas, data)
+    cost_f.append(error)
+    errordelta = olderror - error
+    i += 1
+print("theta0: " + str(thetas[0]) + ", theta1: " + str(thetas[1]) + ", squared error: " + str(error))
+import matplotlib.pyplot as pylab
+pylab.plot(range(len(cost_f)), cost_f)
+pylab.show()

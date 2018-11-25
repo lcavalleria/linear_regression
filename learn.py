@@ -1,54 +1,45 @@
 import estimate
+import copy
+import readData as rd
+import matplotlib.pyplot as pylab
 
-learningRate = 0.00000000000001
+learningRate = 1
 thetas = [0, 0]
-# avgkm = 0
-# minkm = float("inf")
-# maxkm = float(0)
-with open("data.csv") as f:
-    f.readline()
-    data = [[]]
-    for line in f:
-        values = line.split(',')
-        km = float(values[0])
-        data.append([km, int(values[1][:-1])])
-        # avgkm += km
-        # if km > maxkm:
-        #     maxkm = km
-        # if km < minkm:
-        #     minkm = km
-data.pop(0)
+
+data, avgkm, minkm, maxkm = rd.readData()
+
+############### scale data ###############
 m = len(data)
-# avgkm = avgkm / m
-# for values in data:
-#     values[0] = (values[0] - avgkm) / (maxkm - minkm)
-error = 1
-dataplot = list(map(list, zip(*data)))
-errordelta = 1
+avgkm = avgkm / m
+for values in data:
+    values[0] = (values[0] - minkm) / (maxkm - minkm)
+
+############### gradient descent ###############
+costdelta = 1
+cost = float("inf")
 cost_f = []
 i = 0
-while abs(errordelta) > 0.00005 and i < 50000:
+while abs(costdelta) > 0.001 and i < 500:
     thetasum0 = 0
     thetasum1 = 0
     for values in data:
-        mileage = values[0]
-        price = values[1]
-        estimatedPrice = estimate.estimateLine(thetas, mileage)
-        thetasum0 += estimatedPrice - price
-        thetasum1 += (estimatedPrice - price) * mileage
+        estimatedPrice = estimate.estimateLine(thetas, values[0])
+        thetasum0 += estimatedPrice - values[1]
+        thetasum1 += (estimatedPrice - values[1]) * values[0]
     thetas[0] = thetas[0] - learningRate * thetasum0 / m
     thetas[1] = thetas[1] - learningRate  * thetasum1 / m
-    olderror = error
-    error = estimate.cost(thetas, data)
-    cost_f.append(error)
-    errordelta = olderror - error
+    oldcost = cost
+    cost = estimate.cost(thetas, data)
+    cost_f.append(cost)
+    costdelta = oldcost - cost
     i += 1
-print("theta0: " + str(thetas[0]) + ", theta1: " + str(thetas[1]) + ", squared error: " + str(error))
+
+############### save thetas file ###############
+print("theta0: " + str(thetas[0]) + ", theta1: " + str(thetas[1]) + ", squared error: " + str(cost))
 f = open("thetas.txt","w")
 f.write(str(thetas[0]) + "\n")
 f.write(str(thetas[1]))
-import matplotlib.pyplot as pylab
-pylab.scatter(dataplot[0], dataplot[1])
-pylab.show()
+
+############### plot ###############
 pylab.plot(range(len(cost_f)), cost_f)
 pylab.show()

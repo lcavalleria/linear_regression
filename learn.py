@@ -1,27 +1,27 @@
 import estimate
 
-learningRate = 0.0005
+learningRate = 0.00000000000001
 thetas = [0, 0]
-avgkm = 0
-minkm = float("inf")
-maxkm = 0
+# avgkm = 0
+# minkm = float("inf")
+# maxkm = float(0)
 with open("data.csv") as f:
     f.readline()
     data = [[]]
     for line in f:
         values = line.split(',')
-        km = int(values[0])
+        km = float(values[0])
         data.append([km, int(values[1][:-1])])
-        avgkm += km
-        if km > maxkm:
-            maxkm = km
-        if km < minkm:
-            minkm = km
+        # avgkm += km
+        # if km > maxkm:
+        #     maxkm = km
+        # if km < minkm:
+        #     minkm = km
 data.pop(0)
 m = len(data)
-avgkm = avgkm / m
-for values in data:
-    values[0] = (values[0] - minkm) / (maxkm - minkm)
+# avgkm = avgkm / m
+# for values in data:
+#     values[0] = (values[0] - avgkm) / (maxkm - minkm)
 error = 1
 dataplot = list(map(list, zip(*data)))
 errordelta = 1
@@ -44,6 +44,11 @@ while abs(errordelta) > 0.00005 and i < 50000:
     errordelta = olderror - error
     i += 1
 print("theta0: " + str(thetas[0]) + ", theta1: " + str(thetas[1]) + ", squared error: " + str(error))
+f = open("thetas.txt","w")
+f.write(str(thetas[0]) + "\n")
+f.write(str(thetas[1]))
 import matplotlib.pyplot as pylab
+pylab.scatter(dataplot[0], dataplot[1])
+pylab.show()
 pylab.plot(range(len(cost_f)), cost_f)
 pylab.show()
